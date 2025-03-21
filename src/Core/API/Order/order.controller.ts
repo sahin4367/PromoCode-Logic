@@ -1,7 +1,7 @@
 import { Request,Response,NextFunction } from "express";
 import { User } from "../../../DAL/models/user.model";
 import { Phone } from "../../../DAL/models/phone.model";
-import { PromoCode } from "../../../DAL/models/promocode.model";
+// import { PromoCode } from "../../../DAL/models/promocode.model";
 import { EStatus, Order } from "../../../DAL/models/order.model";
 
 interface CreateOrderDTO {
@@ -15,7 +15,7 @@ const createOrder = async(req:Request,res:Response,next:NextFunction):Promise<vo
     try {
         const { userId, phoneId, totalPrice }: CreateOrderDTO = req.body;
         if (!userId || !phoneId || !totalPrice) {
-            res.status(400).json({ message: `Butun melumatlari daxil edin~!` });
+            res.status(400).json({ message: `Pliase, all required information~!` });
             return;
         }
 
@@ -24,7 +24,7 @@ const createOrder = async(req:Request,res:Response,next:NextFunction):Promise<vo
         // const promoCode = promoCodeId ? await PromoCode.findOne({ where: { id: promoCodeId } }) : undefined;
 
         if (!user || !phone) {
-            res.status(404).json({ message: `User veya Phone tapilmadi~!` });
+            res.status(404).json({ message: `User or Phone not found~!` });
             return;
         }
 
@@ -39,71 +39,113 @@ const createOrder = async(req:Request,res:Response,next:NextFunction):Promise<vo
         res.status(201).json(savedOrder);
     } catch (error:any) {
         res.status(500).json({
-            message : `xeta  bas verdi~!`
+            message : `An error occurred~!`
         });
         return;
     }
 }
 
 
-// const getOrderList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-//     try {
-//         const orders = await Order.find({
-//             relations: ["user", "phone", "promoCode"]
-//         });
-//         res.status(200).json(orders);
-//     } catch (error: any) {
-//         res.status(500).json({ message: `Xeta bas verdi~!` });
-//     }
-// };
+const getOrderList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const orders = await Order.find({
+            relations: ["user", "phone", "promoCode"],
+            select : {
+                user : {
+                    id : true,
+                    name : true,
+                    email : true,
+                },
+                phone : {
+                    id : true,
+                    title : true,
+                    price : true,
+                },
+                promoCode : {
+                    id : true,
+                    code : true
+                }
+            }
+        });
+        res.status(200).json(orders);
+    } catch (error: any) {
+        res.status(500).json({ message: `An error occurred~!` });
+    }
+};
 
-// const updateOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-//     try {
-//         const orderId = Number(req.params.id);
-//         const { status }: { status: EStatus } = req.body;
+const updateOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const orderId = Number(req.params.id);
+        const { status }: { status: EStatus } = req.body;
 
-//         const order = await Order.findOne({
-//             where: { id: orderId },
-//             relations: ["user", "phone", "promoCode"],
-//         });
-//         if (!order) {
-//             res.status(404).json({ message: `Order tapilmadi~!` });
-//             return;
-//         }
+        const order = await Order.findOne({
+            where: { id: orderId },
+            relations: ["user", "phone", "promoCode"],
+            select  : {
+                user : {
+                    id : true,
+                    name : true,
+                    email  : true,
+                },
+                phone : {
+                    id : true,
+                    title : true,
+                    price : true,
+                },
+                promoCode : {
+                    id : true,
+                    code : true,
+                }
+            }
+        });
+        if (!order) {
+            res.status(404).json({ message: `Order not found~!` });
+            return;
+        }
 
-//         if (status) {
-//             order.status = status;
-//         }
+        if (status) {
+            order.status = status;
+        }
 
-//         const updatedOrder = await order.save();
-//         res.status(200).json({
-//             message: `Order successfully updated~!`,
-//             order: updatedOrder,
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({ message: `Xeta bas verdi~!` });
-//     }
-// };
+        const updatedOrder = await order.save();
+        res.status(200).json({
+            message: `Order successfully updated~!`,
+            order: updatedOrder,
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: `An error occurred~!` });
+    }
+};
 
-// const softDeleteOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-//     try {
-//         const orderId = Number(req.params.id);
+const softDeleteOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const orderId = Number(req.params.id);
 
-//         const order = await Order.findOne({ where: { id: orderId } });
-//         if (!order) {
-//             res.status(404).json({ message: `Order tapilmadi~!` });
-//             return;
-//         }
+        const order = await Order.findOne({ where: { id: orderId } });
+        if (!order) {
+            res.status(404).json({ message: `Order not found~!` });
+            return;
+        }
 
-//         order.status = EStatus.CANCELED;
+        const deletedOrder = await Order.update(orderId , {
+            isdeleted : true,
+            deleted_at : new Date()
+        });
 
-//         await order.save();
-//         res.status(200).json({ message: `Order successfully canceled~!` });
-//     } catch (error: any) {
-//         res.status(500).json({ message: `Xeta bas verdi~!` });
-//     }
-// };
+
+        order.status = EStatus.CANCELED;
+        res.status(201).json({
+                message : `Order successfully deleted~!`
+        });
+        return;
+    } catch (error: any) {
+        res.status(500).json({ message: `An error occurred~!` });
+    }
+};
 
 export const OrderController = {
-    createOrder
+    createOrder,
+    getOrderList,
+    updateOrder,
+    softDeleteOrder,
 }

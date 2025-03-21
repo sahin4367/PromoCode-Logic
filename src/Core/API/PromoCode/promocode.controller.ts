@@ -15,13 +15,13 @@ import { PromoCode } from "../../../DAL/models/promocode.model";
             const { code, discountPercentage, expiresAt, userLimit = 0 }: CreatePromoCodeDTO = req.body;
 
             if (!code || !discountPercentage || !expiresAt) {
-                res.status(400).json({ message: "Bütün məlumatları daxil edin!" });
+                res.status(400).json({ message: "Please provide all required fields~!" });
                 return;
             }
 
             const existingPromo = await PromoCode.findOne({ where: { code } });
             if (existingPromo) {
-                res.status(400).json({ message: "Bu promo kod artıq mövcuddur!" });
+                res.status(400).json({ message: "This promo code already exists~!" });
                 return;
             }
 
@@ -34,9 +34,9 @@ import { PromoCode } from "../../../DAL/models/promocode.model";
 
             await promo.save();
 
-            res.status(201).json({ message: "Promo kod uğurla yaradıldı!", promo });
+            res.status(201).json({ message: "Promo code created successfully~!", promo });
         } catch (error: any) {
-            res.status(500).json({ message: "Xəta baş verdi!", error });
+            res.status(500).json({ message: "An error occurred~!", error });
         }
     };
 
@@ -51,19 +51,27 @@ const applyPromoCode = async (req: Request, res: Response, next: NextFunction): 
         }
 
         if (order.promoCode) {
-            res.status(400).json({ message: "bu sifarise artiq promocodu tetbiq oplunub~!" });
+            res.status(400).json({ message: "This promo code  already  apply to this order~!" });
             return;
         }
 
         const promo = await PromoCode.findOne({ where: { code } });
         if (!promo || !promo.isActive || new Date(promo.expiresAt) <= new Date()) {
-            res.status(400).json({ message: `Promo kod etibarsizdir~!` });
+            res.status(400).json({ message: `The promo code is invalid~!` });
             return;
         }
 
-        const orderCount = await Order.count({ where: { promoCode: { id: promo.id } } });
+        const orderCount = await Order.count({ 
+            where: { promoCode: 
+                { 
+                    id: promo.id 
+                } 
+            } 
+        });
+
+        //busines logic:
         if (promo.userLimit > 0 && orderCount >= promo.userLimit) {
-            res.status(400).json({ message: `Promo kodun istifadəsi mehdudlasdirilib~!` });
+            res.status(400).json({ message: `The promo code usage limit has been reached~!` });
             return;
         }
 
@@ -71,9 +79,9 @@ const applyPromoCode = async (req: Request, res: Response, next: NextFunction): 
         order.promoCode = promo;
         await order.save();
 
-        res.status(200).json({ message: "Promo kod uğurla tətbiq edildi.", order });
+        res.status(200).json({ message: "Promo code successfully applied~!", order });
     } catch (error: any) {
-        res.status(500).json({ message: "Xəta baş verdi.", error });
+        res.status(500).json({ message: "An error occurred~!", error });
     }
 };
 

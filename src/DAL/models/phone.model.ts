@@ -18,7 +18,6 @@ export class Phone extends BaseEntity {
     @DeleteDateColumn({type : "datetime" , nullable : true})
     deleted_at : Date;
 
-
     @OneToMany(() => Order , (orders) => orders.phone)
     orders : Order[];
 }

@@ -1,5 +1,4 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Order } from "./order.model";
 
 @Entity({name : "promocodes"})
 export class PromoCode extends BaseEntity {

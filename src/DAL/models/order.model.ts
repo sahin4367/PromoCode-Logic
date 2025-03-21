@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.model";
 import { Phone } from "./phone.model";
 import { PromoCode } from "./promocode.model";
@@ -23,6 +23,12 @@ export class Order extends BaseEntity {
 
     @Column({type : "enum" ,enum : EStatus , default : EStatus.PENDING})
     status: EStatus;
+
+    @Column({default : false})
+        isdeleted : boolean;
+    
+    @DeleteDateColumn({type : "datetime" , nullable : true})
+    deleted_at : Date;
 
     @ManyToOne(() => User, (user) => user.orders)
     @JoinColumn({name : "user_id"})

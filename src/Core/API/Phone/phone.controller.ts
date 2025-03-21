@@ -11,7 +11,7 @@ const createPhone = async(req:Request,res:Response,next:NextFunction):Promise<vo
         const {title,price} = req.body;
         if (!title || !price) {
             res.status(400).json({
-                message : `Butun melumatlari  daxil edin~!`
+                message : `Pliase , all required information~!`
             });
             return;
         }
@@ -25,7 +25,7 @@ const createPhone = async(req:Request,res:Response,next:NextFunction):Promise<vo
         return;
     } catch (error:any) {
         res.status(500).json({
-            message : `Xeta bas verdi~!`
+            message : `An error occurred~!`
         });
         return;
     }
@@ -38,7 +38,7 @@ const getList = async(req:Request,res:Response,next:NextFunction):Promise<void> 
         });
         res.status(200).json(phones)
     } catch (error:any) {
-        res.status(500).json({message : `Xeta bas verdi~!`})
+        res.status(500).json({message : `An error occurred~!`})
         return;        
     }
 }
@@ -52,7 +52,7 @@ const updatePhone = async(req:Request,res:Response,next:NextFunction):Promise<vo
         });
         if (!phone) {
             res.status(404).json({
-                message : `Phone npt found~!`
+                message : `Phone not found~!`
             });
             return;
         }
@@ -61,15 +61,15 @@ const updatePhone = async(req:Request,res:Response,next:NextFunction):Promise<vo
 
         const updatePhone = await phone.save();
         res.status(200).json({
-            message: `Book successfully updated~!`,
-            book: {
+            message: `Phone successfully updated~!`,
+            phone: {
                 title: updatePhone.title,
                 price: updatePhone.price,
             }
         });
     } catch (error:any) {
         res.status(500).json({
-            message : `Xeta bas verdi~!`
+            message : `An error occurred~!`
         });
         return;
     }
@@ -97,7 +97,7 @@ const sogftDeletePhone = async(req:Request,res:Response,next:NextFunction):Promi
         return;
     } catch (error : any) {
         res.status(500).json({
-            mesage : `Xeta bas verdi~!`
+            mesage : `An error occurred~!`
         });
         return;
     }
