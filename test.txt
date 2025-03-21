@@ -1,0 +1,36 @@
+import { Request, Response, NextFunction } from "express";
+import { Order } from "../../../DAL/models/order.model";
+import { PromoCode } from "../../../DAL/models/promocode.model";
+
+const applyPromoCode = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { orderId, code } = req.body;
+
+        // Validasiya: Order mövcuddurmu?
+        const order = await Order.findOne({ where: { id: orderId } });
+        if (!order) {
+            res.status(404).json({ message: "Order tapılmadı~!" });
+            return;
+        }
+
+        // Validasiya: Promo kod mövcuddurmu və aktivdirmi?
+        const promo = await PromoCode.findOne({ where: { code } }); // `code` ilə tapırıq
+        if (!promo || !promo.isActive) {
+            res.status(400).json({ message: "Promo kod etibarsızdır və ya deaktiv edilib~!" });
+            return;
+        }
+
+        // Validasiya: Promo kodun bitmə tarixi keçibmi?
+        if (promo.expiresAt < new Date()) {
+            res.status(400).json({ message: "Promo kodun istifadə müddəti bitmişdir~!" });
+            return;
+        }
+
+        // Validasiya: Promo kodun istifadə limiti dolubmu?
+        const appliedOrdersCount = await Order.count({ where: { promoCode: promo } });
+        if (promo.userLimit > 0 && appliedOrdersCount >= promo.userLimit) {
+            res.status(400).json({ message: "Promo kodun istifadə limiti bitmişdir~!" });
+            return;
+        }
+
+        // Endirimi tətbiq et
