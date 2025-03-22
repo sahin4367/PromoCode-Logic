@@ -1,5 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Order } from "./order.model";
+import { Payment } from "./payment.model";
 
 
 export enum EUserRole {
@@ -45,5 +46,8 @@ export class User extends BaseEntity {
 
     @OneToMany(() => Order , (orders) => orders.user)
     orders : Order[];
+
+    @OneToMany(() => Payment , payment  => payment.users)
+    payments : Payment[];
 
 }

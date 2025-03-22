@@ -1,7 +1,9 @@
-import { BaseEntity, Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.model";
 import { Phone } from "./phone.model";
 import { PromoCode } from "./promocode.model";
+import { Payment } from "./payment.model";
+import { string } from "joi";
 
 export enum EStatus {
     PENDING = "PENDING",
@@ -14,7 +16,10 @@ export class Order extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column("decimal", { precision: 10, scale: 2 })
+    @Column("decimal", { precision: 10, scale: 2 , transformer : {
+        from: (value: string) => parseFloat(value),
+        to: (value: number) => value.toFixed(2)
+    }})
     totalPrice: number;
 
     @ManyToOne(() => PromoCode, { nullable: true })
@@ -37,4 +42,7 @@ export class Order extends BaseEntity {
     @ManyToOne(() => Phone , phone => phone.orders)
     @JoinColumn({ name : "phone_id"})
     phone: Phone;
+
+    @OneToMany(() => Payment , payment => payment.orders)
+    payments : Payment[];
 }

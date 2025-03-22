@@ -7,7 +7,7 @@ export const PhoneRouter = Router();
 const controller = PhoneController;
 
 PhoneRouter.post("/create" , useAuth,adminAuth,controller.createPhone)
-PhoneRouter.get('/list' , controller.getList)
+PhoneRouter.get('/list' , useAuth , adminAuth ,controller.getList)
 PhoneRouter.put('/update/:id' , useAuth, adminAuth, controller.updatePhone)
 PhoneRouter.put('/delete/:id' , useAuth, adminAuth, controller.sogftDeletePhone)
 

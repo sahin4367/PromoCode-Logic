@@ -7,6 +7,6 @@ export const OrderRouter = Router();
 const controller = OrderController;
 
 OrderRouter.post('/create' , useAuth, adminAuth, controller.createOrder)
-OrderRouter.get('/list' , useAuth , controller.getOrderList)
+OrderRouter.get('/list' , useAuth , adminAuth , controller.getOrderList)
 OrderRouter.put('/update/:id' , useAuth , adminAuth, controller.updateOrder)
 OrderRouter.put('/delete/:id' , useAuth , adminAuth, controller.softDeleteOrder)

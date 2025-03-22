@@ -19,8 +19,18 @@ const createOrder = async(req:Request,res:Response,next:NextFunction):Promise<vo
             return;
         }
 
-        const user = await User.findOne({ where: { id: userId } });
-        const phone = await Phone.findOne({ where: { id: phoneId } });
+        const user = await User.findOne({ 
+            where: { id: userId },
+            select : {
+                id : true,
+                createdAt : true,
+                updatedAt : true,
+                deletedAt : true,
+            }
+        });
+        const phone = await Phone.findOne({ 
+            where: { id: phoneId }
+        });
         // const promoCode = promoCodeId ? await PromoCode.findOne({ where: { id: promoCodeId } }) : undefined;
 
         if (!user || !phone) {
@@ -36,7 +46,10 @@ const createOrder = async(req:Request,res:Response,next:NextFunction):Promise<vo
         order.status = EStatus.PENDING;
 
         const savedOrder = await order.save();
-        res.status(201).json(savedOrder);
+        res.status(201).json({
+            message : `Order successfully created~!`,
+            order : savedOrder,
+        });
     } catch (error:any) {
         res.status(500).json({
             message : `An error occurred~!`
